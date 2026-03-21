@@ -1,0 +1,48 @@
+-- [[ SAADHUB - FPS BOOSTER (BOX TRAP STYLE) ]] --
+-- وصف: تخفيف اللاق وتقوية الفريمات بدون حذف اللاعبين
+
+local function cleanMap()
+    -- 1. إعدادات الإضاءة (إلغاء الظلال والضباب)
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = false
+    lighting.FogEnd = 9e9
+    lighting.Brightness = 2
+    for _, v in pairs(lighting:GetChildren()) do
+        if v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("BloomEffect") or v:IsA("DepthOfFieldEffect") then
+            v.Enabled = false
+        end
+    end
+
+    -- 2. تنظيف الماب وتحسين الخامات
+    for _, v in pairs(game:GetDescendants()) do
+        -- شرط أساسي: ما يلمس أي شي يخص اللاعبين (الشخصيات)
+        if not v:IsDescendantOf(game.Players) and not v:IsA("Humanoid") then
+            if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+                v.Material = Enum.Material.SmoothPlastic -- تحويل كل شيء لبلاستيك ناعم
+                v.Reflectance = 0
+                v.CastShadow = false
+            elseif v:IsA("Decal") or v:IsA("Texture") then
+                v:Destroy() -- حذف الصور والنقوش الزايدة (هذي أهم خطوة لتخفيف اللاق)
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Enabled = false -- إيقاف الجزيئات والمؤثرات اللي تطير
+            elseif v:IsA("Explosion") then
+                v.Visible = false
+            end
+        end
+    end
+    
+    -- 3. تحسين جودة العرض (للأجهزة الضعيفة)
+    settings().Rendering.QualityLevel = 1
+    
+    print("SAADHUB: FPS Boost Activated! ✅")
+end
+
+-- تشغيل السكربت فوراً
+cleanMap()
+
+-- إشعار بسيط للتأكيد
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "SAADHUB FPS",
+    Text = "تم تخفيف اللاق بنجاح!",
+    Duration = 5
+})
