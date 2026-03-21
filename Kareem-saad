@@ -1,53 +1,54 @@
--- [[ SAADHUB - FPS BOOST + WHITE BOMB (PROTECT FACES) ]] --
+-- [[ SAADHUB V2 - NO EXPLOSION + WHITE BOMB + FPS BOOST ]] --
 
-local function startSaadHubSafe()
-    -- 1. حماية الوجوه والملامح (تجاهل أي شيء يخص اللاعبين)
-    local function isPlayerPart(obj)
-        return obj:IsDescendantOf(game.Players) or obj:FindFirstAncestorOfClass("Model"):FindFirstChild("Humanoid")
-    end
+local function startUltraBoost()
+    -- 1. وظيفة حذف الانفجارات واللاق فوراً
+    local function clean(v)
+        -- منع انفجار القنبلة (Remove Explosion)
+        if v:IsA("Explosion") then
+            v.Visible = false
+            v.BlastRadius = 0
+            v.BlastPressure = 0
+            task.wait()
+            v:Destroy() -- حذف نهائي
+        end
 
-    local function cleanObject(v)
-        -- شرط ذهبي: إذا كان الجزء يخص لاعب، اتركه ولا تلمسه
-        if isPlayerPart(v) then return end
+        -- حماية اللاعبين وملامح وجيههم
+        if v:IsDescendantOf(game.Players) or (v.Parent and v.Parent:FindFirstChild("Humanoid")) then
+            return 
+        end
 
-        -- 2. تحويل القنابل والماب (بدون لمس وجوه اللاعبين)
+        -- تخفيف اللاق للماب وتبييض القنابل
         if v:IsA("BasePart") then
             v.Material = Enum.Material.SmoothPlastic
             v.CastShadow = false
-            -- تحويل القنبلة السوداء إلى بيضاء
+            -- لو القطعة سودة (قنبلة) يقلبها أبيض
             if v.Color.r < 0.2 and v.Color.g < 0.2 and v.Color.b < 0.2 then
                 v.Color = Color3.fromRGB(255, 255, 255)
             end
-        -- حذف الصور (Textures) للماب فقط وليس للاعبين
         elseif v:IsA("Decal") or v:IsA("Texture") then
-            -- التأكد أن الملصق ليس "وجهاً" (Face) للاعب
-            if v.Name ~= "face" and not v.Parent:IsA("Accessory") then
-                v:Destroy()
-            end
-        -- إخفاء تعليق الانفجارات والدخان
-        elseif v:IsA("ParticleEmitter") or v:IsA("Explosion") then
-            if v:IsA("Explosion") then v.Visible = false end
-            if v:IsA("ParticleEmitter") then v.Enabled = false end
+            if v.Name ~= "face" then v:Destroy() end
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") then
+            v:Destroy() -- حذف أي دخان يسبب لاق
         end
     end
 
-    -- تنظيف الماب الحالي
+    -- تنظيف كل شيء موجود حالياً
     for _, v in pairs(game.Workspace:GetDescendants()) do
-        pcall(function() cleanObject(v) end)
+        pcall(clean, v)
     end
 
-    -- تنظيف أي قنابل أو قطع ماب جديدة تظهر
+    -- مراقبة أي قنبلة أو انفجار جديد (عشان يحذفه فوراً)
     game.Workspace.DescendantAdded:Connect(function(v)
-        pcall(function() cleanObject(v) end)
+        pcall(clean, v)
     end)
 end
 
--- تشغيل السكربت المطور
-pcall(startSaadHubSafe)
+-- تشغيل النظام
+pcall(startUltraBoost)
 
--- إشعار SAADHUB
+-- إشعار التشغيل
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "SAADHUB V2",
-    Text = "تخفيف اللاق + حماية الوجوه ✅👤",
+    Title = "SAADHUB OFFICIAL",
+    Text = "Explosion Removed & White Bomb ✅",
     Duration = 5
 })
