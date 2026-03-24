@@ -1,55 +1,72 @@
--- [[ SAADHUB V2 - NO EXPLOSION + WHITE BOMB + FPS BOOST ]] --
+-- [[ ULTIMATE LAG KILLER & FPS BOOST - BY GEMINI ]] --
 
-local function startUltraBoost()
-    -- 1. وظيفة حذف الانفجارات واللاق فوراً
-    local function clean(v)
-        -- منع انفجار القنبلة (Remove Explosion)
-        if v:IsA("Explosion") then
-            v.Visible = false
-            v.BlastRadius = 0
-            v.BlastPressure = 0
-            task.wait()
-            v:Destroy() -- حذف نهائي
-        end
+local settings = {
+    DestroyTextures = true,
+    DestroyDecals = true,
+    DestroyParticles = true,
+    LowLighting = true,
+    SmoothPlasticAll = true
+}
 
-        -- حماية اللاعبين وملامح وجيههم
-        if v:IsDescendantOf(game.Players) or (v.Parent and v.Parent:FindFirstChild("Humanoid")) then
-            return 
-        end
-
-        -- تخفيف اللاق للماب وتبييض القنابل
-        if v:IsA("BasePart") then
-            v.Material = Enum.Material.SmoothPlastic
-            v.CastShadow = false
-            -- لو القطعة سودة (قنبلة) يقلبها أبيض
-            if v.Color.r < 0.2 and v.Color.g < 0.2 and v.Color.b < 0.2 then
-                v.Color = Color3.fromRGB(255, 255, 255)
-            end
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            if v.Name ~= "face" then v:Destroy() end
-        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") then
-            v:Destroy() -- حذف أي دخان يسبب لاق
-        end
+local function boost(v)
+    -- 1. تعطيل الانفجارات تماماً
+    if v:IsA("Explosion") then
+        v.BlastRadius = 0
+        v.BlastPressure = 0
+        v.Visible = false
+        v:Destroy()
     end
 
-    -- تنظيف كل شيء موجود حالياً
-    for _, v in pairs(game.Workspace:GetDescendants()) do
-        pcall(clean, v)
+    -- 2. تحويل الخامات إلى بلاستيك ناعم (أخف شيء على الكرت)
+    if v:IsA("BasePart") or v:IsA("MeshPart") or v:IsA("Part") then
+        v.Material = Enum.Material.SmoothPlastic
+        v.CastShadow = false
+        v.Reflectance = 0
     end
 
-    -- مراقبة أي قنبلة أو انفجار جديد (عشان يحذفه فوراً)
-    game.Workspace.DescendantAdded:Connect(function(v)
-        pcall(clean, v)
-    end)
+    -- 3. حذف الصور والملصقات (Decals) لتقليل استهلاك الذاكرة
+    if (v:IsA("Decal") or v:IsA("Texture")) and v.Name ~= "face" then
+        v:Destroy()
+    end
+
+    -- 4. حذف التأثيرات المتحركة (نار، دخان، جزيئات)
+    if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
+        v.Enabled = false
+        task.wait()
+        v:Destroy()
+    end
+    
+    -- 5. تقليل جودة الشبكات (Meshes)
+    if v:IsA("MeshPart") then
+        v.RenderFidelity = Enum.RenderFidelity.Performance
+    end
 end
 
--- تشغيل النظام
-pcall(startUltraBoost)
+-- تطبيق الإعدادات على الماب بالكامل
+for _, v in pairs(game.Workspace:GetDescendants()) do
+    pcall(boost, v)
+end
 
--- إشعار التشغيل
+-- مراقبة أي شيء جديد يظهر وحذفه فوراً
+game.Workspace.DescendantAdded:Connect(function(v)
+    pcall(boost, v)
+end)
+
+-- 6. تعديل إعدادات الإضاءة (أكبر مسبب للاق)
+local lighting = game:GetService("Lighting")
+lighting.GlobalShadows = false
+lighting.FogEnd = 9e9
+lighting.Brightness = 1
+
+for _, effect in pairs(lighting:GetChildren()) do
+    if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") then
+        effect.Enabled = false
+    end
+end
+
+-- إشعار بنجاح العملية
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "SAADHUB OFFICIAL",
-    Text = "Explosion Removed & White Bomb ✅",
+    Title = "FPS BOOST ACTIVE",
+    Text = "All Lag Sources Cleared! 🚀",
     Duration = 5
 })
-
