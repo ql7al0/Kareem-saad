@@ -167,7 +167,8 @@ runService.RenderStepped:Connect(function()
             end
             if lockedTarget then
                 local dist = (lockedTarget.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                if dist > (math.random(11, 14) / 10) then
+                -- المسافة الجديدة المعدلة: (15 إلى 25) تقسيم 10 تعطي (1.5 إلى 2.5 متر)
+                if dist > (math.random(15, 25) / 10) then
                     player.Character.Humanoid:Move((lockedTarget.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Unit, false) 
                 end
                 fastTouch(lockedTarget, tool)
