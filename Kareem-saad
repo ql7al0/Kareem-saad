@@ -84,6 +84,7 @@ task.spawn(function()
     for _, v in pairs(blackFrame:GetDescendants()) do pcall(function() if v:IsA("TextLabel") or v:IsA("Frame") or v:IsA("ImageLabel") then tweenService:Create(v, TweenInfo.new(0.8), {Transparency = 1}):Play() end end) end
     fade:Play(); fade.Completed:Wait(); introGui:Destroy()
     
+    -- الإشعار الجديد
     if isFirstUpdateNotify then
         starterGui:SetCore("SendNotification", {
             Title = "SHIELD ACTIVE 🛡️",
@@ -101,6 +102,7 @@ toggle.Size = UDim2.new(0, 140, 0, 45); toggle.Position = UDim2.new(0.05, 0, 0.4
 toggle.BackgroundColor3 = Color3.fromRGB(170, 0, 0); toggle.TextColor3 = Color3.new(1, 1, 1); toggle.Font = Enum.Font.GothamBold; toggle.TextSize = 16; Instance.new("UICorner", toggle)
 Instance.new("UIStroke", toggle).Color = Color3.new(1, 1, 1)
 
+-- الدائرة البيضاء للسحب
 local dragCircle = Instance.new("Frame", toggle)
 dragCircle.Size = UDim2.new(0, 25, 0, 25); dragCircle.Position = UDim2.new(0.5, -12.5, 0, -32)
 dragCircle.BackgroundColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", dragCircle).CornerRadius = UDim.new(1, 0)
@@ -133,16 +135,16 @@ end
 local active = true
 local lockedTarget = nil
 
--- وظيفة اللمس الواقعي (Legit Touch) لتقليل الشك
-local function legitTouch(targetChar, tool)
+-- وظيفة اللمس السريع جداً (Magnetic Touch)
+local function fastTouch(targetChar, tool)
     local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
     if handle and targetChar:FindFirstChild("HumanoidRootPart") then
         local dist = (player.Character.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude
-        -- يتم اللمس فقط عند القرب لضمان عدم الكشف
-        if dist < 3.5 then
+        -- مسافة الأمان 3.8 متر لضمان عدم الباند
+        if dist < 3.8 then
             task.spawn(function()
-                -- تقليل عدد اللمسات لـ 3 لتبدو طبيعية للخصم
-                for i = 1, 3 do
+                -- إرسال أوامر لمس مكثفة لضمان انتقال القنبلة فوراً (حل مشكلة الفيديو)
+                for i = 1, 15 do
                     firetouchinterest(targetChar.HumanoidRootPart, handle, 0)
                     firetouchinterest(targetChar.HumanoidRootPart, handle, 1)
                 end
@@ -151,24 +153,15 @@ local function legitTouch(targetChar, tool)
     end
 end
 
--- دالة التبديل
-local function toggleMode()
-    active = not active
-    toggle.Text = active and "SAADHUB: ON" or "SAADHUB: OFF"
+toggle.MouseButton1Click:Connect(function()
+    active = not active; toggle.Text = active and "SAADHUB: ON" or "SAADHUB: OFF"
     toggle.BackgroundColor3 = active and Color3.fromRGB(170, 0, 0) or Color3.fromRGB(40, 40, 40)
     if not active then lockedTarget = nil end
-end
-
--- التشغيل والإيقاف بـ (كليك يسار)
-userInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
-        toggleMode()
-    end
 end)
-toggle.MouseButton1Click:Connect(toggleMode)
 
 runService.RenderStepped:Connect(function()
     if active and player.Character and player.Character:FindFirstChild("Humanoid") then
+        -- الإمساك التلقائي للقنبلة (ضروري للسرعة)
         local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
         if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
 
@@ -190,15 +183,15 @@ runService.RenderStepped:Connect(function()
                 local myRoot = player.Character.HumanoidRootPart
                 local dist = (targetRoot.Position - myRoot.Position).Magnitude
                 
-                -- [[ ميزة التذبذب الذكي 3.0 إلى 4.5 ]] --
-                local smartOffset = math.random(30, 45) / 10 
+                -- [[ ميزة التذبذب الذكي ]] --
+                local smartOffset = math.random(25, 35) / 10 -- تم تعديل التذبذب من 2.5 الى 3.5
                 
                 if dist > smartOffset then
                     player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
                 end
 
-                -- تفعيل اللمس الواقعي
-                legitTouch(lockedTarget, tool)
+                -- تفعيل اللمس السريع لحل مشكلة التأخير
+                fastTouch(lockedTarget, tool)
             end
         else lockedTarget = nil end
     end
