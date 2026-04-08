@@ -1,4 +1,4 @@
--- [[ SAADHUB OFFICIAL - FULL VERSION V102 (ANTI-BAN + SMART JITTER) ]] --
+-- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
 local httpService = game:GetService("HttpService")
@@ -7,7 +7,7 @@ local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local starterGui = game:GetService("StarterGui")
 
--- [[ نظام الحفظ للإشعار الجديد - يظهر مرة واحدة للأبد ]] --
+-- [[ نظام الحفظ للإشعار الجديد ]] --
 local updateFileName = "SaadHub_Safe_V102_Jitter.json"
 local function shouldNotifyUpdate()
     local success, content = pcall(function() return readfile(updateFileName) end)
@@ -37,7 +37,7 @@ task.spawn(function()
     end)
 end)
 
--- [[ 2. واجهة المقدمة (نفس تنسيقك الأصلي بالملي) ]] --
+-- [[ 2. واجهة المقدمة ]] --
 local introGui = Instance.new("ScreenGui", player.PlayerGui)
 introGui.Name = "SaadHub_Intro_System"; introGui.IgnoreGuiInset = true; introGui.DisplayOrder = 999
 
@@ -75,7 +75,7 @@ local liveUsers = Instance.new("TextLabel", blackFrame)
 liveUsers.Size = UDim2.new(1, 0, 0, 20); liveUsers.Position = UDim2.new(0, 0, 0.93, 0)
 liveUsers.Text = "LIVE USERS: " .. liveCount; liveUsers.TextColor3 = Color3.new(1, 1, 1); liveUsers.TextSize = 17; liveUsers.Font = Enum.Font.GothamBold; liveUsers.BackgroundTransparency = 1
 
--- [[ 3. تشغيل الأنيميشن والإشعارات ]] --
+-- [[ 3. تشغيل الأنيميشن ]] --
 task.spawn(function()
     local t = tweenService:Create(loadBar, TweenInfo.new(4), {Size = UDim2.new(1, 0, 1, 0)})
     t:Play(); t.Completed:Wait()
@@ -84,7 +84,6 @@ task.spawn(function()
     for _, v in pairs(blackFrame:GetDescendants()) do pcall(function() if v:IsA("TextLabel") or v:IsA("Frame") or v:IsA("ImageLabel") then tweenService:Create(v, TweenInfo.new(0.8), {Transparency = 1}):Play() end end) end
     fade:Play(); fade.Completed:Wait(); introGui:Destroy()
     
-    -- الإشعار الجديد
     if isFirstUpdateNotify then
         starterGui:SetCore("SendNotification", {
             Title = "SHIELD ACTIVE 🛡️",
@@ -95,14 +94,13 @@ task.spawn(function()
     end
 end)
 
--- [[ 4. واجهة التحكم (تعديل السحب بالدائرة) ]] --
+-- [[ 4. واجهة التحكم ]] --
 local mainGui = Instance.new("ScreenGui", player.PlayerGui); mainGui.ResetOnSpawn = false
 local toggle = Instance.new("TextButton", mainGui)
 toggle.Size = UDim2.new(0, 140, 0, 45); toggle.Position = UDim2.new(0.05, 0, 0.4, 0); toggle.Text = "SAADHUB: ON"
 toggle.BackgroundColor3 = Color3.fromRGB(170, 0, 0); toggle.TextColor3 = Color3.new(1, 1, 1); toggle.Font = Enum.Font.GothamBold; toggle.TextSize = 16; Instance.new("UICorner", toggle)
 Instance.new("UIStroke", toggle).Color = Color3.new(1, 1, 1)
 
--- الدائرة البيضاء للسحب
 local dragCircle = Instance.new("Frame", toggle)
 dragCircle.Size = UDim2.new(0, 25, 0, 25); dragCircle.Position = UDim2.new(0.5, -12.5, 0, -32)
 dragCircle.BackgroundColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", dragCircle).CornerRadius = UDim.new(1, 0)
@@ -135,15 +133,12 @@ end
 local active = true
 local lockedTarget = nil
 
--- وظيفة اللمس السريع جداً (Magnetic Touch)
 local function fastTouch(targetChar, tool)
     local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
     if handle and targetChar:FindFirstChild("HumanoidRootPart") then
         local dist = (player.Character.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude
-        -- مسافة الأمان 3.8 متر لضمان عدم الباند
         if dist < 3.8 then
             task.spawn(function()
-                -- إرسال أوامر لمس مكثفة لضمان انتقال القنبلة فوراً (حل مشكلة الفيديو)
                 for i = 1, 15 do
                     firetouchinterest(targetChar.HumanoidRootPart, handle, 0)
                     firetouchinterest(targetChar.HumanoidRootPart, handle, 1)
@@ -153,15 +148,26 @@ local function fastTouch(targetChar, tool)
     end
 end
 
-toggle.MouseButton1Click:Connect(function()
-    active = not active; toggle.Text = active and "SAADHUB: ON" or "SAADHUB: OFF"
+-- [[ وظيفة التغيير ]] --
+local function toggleScript()
+    active = not active
+    toggle.Text = active and "SAADHUB: ON" or "SAADHUB: OFF"
     toggle.BackgroundColor3 = active and Color3.fromRGB(170, 0, 0) or Color3.fromRGB(40, 40, 40)
     if not active then lockedTarget = nil end
+end
+
+-- تفعيل/إيقاف عن طريق كليك الماوس اليسار
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        toggleScript()
+    end
 end)
+
+-- الزر اليدوي أيضاً يعمل
+toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
     if active and player.Character and player.Character:FindFirstChild("Humanoid") then
-        -- الإمساك التلقائي للقنبلة (ضروري للسرعة)
         local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
         if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
 
@@ -183,14 +189,13 @@ runService.RenderStepped:Connect(function()
                 local myRoot = player.Character.HumanoidRootPart
                 local dist = (targetRoot.Position - myRoot.Position).Magnitude
                 
-                -- [[ ميزة التذبذب الذكي ]] --
-                local smartOffset = math.random(25, 35) / 10 -- تم تعديل التذبذب من 2.5 الى 3.5
+                -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
+                local smartOffset = math.random(25, 35) / 10 
                 
                 if dist > smartOffset then
                     player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
                 end
 
-                -- تفعيل اللمس السريع لحل مشكلة التأخير
                 fastTouch(lockedTarget, tool)
             end
         else lockedTarget = nil end
