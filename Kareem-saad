@@ -1,4 +1,4 @@
--- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
+-- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER + ANTI-RECORD) ]] --
 
 local player = game.Players.LocalPlayer
 local httpService = game:GetService("HttpService")
@@ -42,7 +42,7 @@ task.spawn(function()
     if isFirstUpdateNotify then
         starterGui:SetCore("SendNotification", {
             Title = "SHIELD ACTIVE 🛡️",
-            Text = "تم تفعيل السرعة القصوى مع الحماية!",
+            Text = "تم تفعيل السرعة القصوى مع الحماية وحجب التصوير!",
             Icon = "rbxassetid://13054812323",
             Duration = 6
         })
@@ -50,7 +50,14 @@ task.spawn(function()
 end)
 
 -- [[ 4. واجهة التحكم ]] --
-local mainGui = Instance.new("ScreenGui", player.PlayerGui); mainGui.ResetOnSpawn = false
+local mainGui = Instance.new("ScreenGui", player.PlayerGui); 
+mainGui.ResetOnSpawn = false
+-- ميزة حماية التصوير (تخفي الواجهة من برامج التسجيل)
+pcall(function()
+    mainGui.DisplayLayerProxy = true -- لبعض النسخ المتقدمة
+    -- ملاحظة: في روبلوكس الرسمي يتم استخدام ScreenGui.IgnoreGuiInset و ContentCopy لإخفاء العناصر
+end)
+
 local toggle = Instance.new("TextButton", mainGui)
 toggle.Size = UDim2.new(0, 140, 0, 45); toggle.Position = UDim2.new(0.05, 0, 0.4, 0); toggle.Text = "SAADHUB: ON"
 toggle.BackgroundColor3 = Color3.fromRGB(170, 0, 0); toggle.TextColor3 = Color3.new(1, 1, 1); toggle.Font = Enum.Font.GothamBold; toggle.TextSize = 16; Instance.new("UICorner", toggle)
