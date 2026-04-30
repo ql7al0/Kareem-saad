@@ -40,4 +40,134 @@ end)
 
 -- [[ إرسال الإشعار ]] --
 task.spawn(function()
-    if isFirstUpdate
+    if isFirstUpdateNotify then
+        starterGui:SetCore("SendNotification", {
+            Title = "SHIELD ACTIVE 🛡️",
+            Text = "تم تفعيل السرعة القصوى مع الحماية!",
+            Icon = "rbxassetid://13054812323",
+            Duration = 6
+        })
+    end
+end)
+
+-- [[ 4. واجهة التحكم (تعديل الإخفاء عن التصوير - Stream Proof) ]] --
+local mainGui = Instance.new("ScreenGui")
+mainGui.ResetOnSpawn = false
+
+-- محاولة وضع الواجهة في مكان محمي عن التصوير
+local success, _ = pcall(function()
+    if gethui then
+        mainGui.Parent = gethui()
+    else
+        mainGui.Parent = coreGui
+    end
+end)
+if not success or not mainGui.Parent then
+    mainGui.Parent = player.PlayerGui
+end
+
+local toggle = Instance.new("TextButton", mainGui)
+toggle.Size = UDim2.new(0, 140, 0, 45); toggle.Position = UDim2.new(0.05, 0, 0.4, 0); toggle.Text = "SAADHUB: ON"
+toggle.BackgroundColor3 = Color3.fromRGB(170, 0, 0); toggle.TextColor3 = Color3.new(1, 1, 1); toggle.Font = Enum.Font.GothamBold; toggle.TextSize = 16; Instance.new("UICorner", toggle)
+Instance.new("UIStroke", toggle).Color = Color3.new(1, 1, 1)
+
+local dragCircle = Instance.new("Frame", toggle)
+dragCircle.Size = UDim2.new(0, 25, 0, 25); dragCircle.Position = UDim2.new(0.5, -12.5, 0, -32)
+dragCircle.BackgroundTransparency = 1; Instance.new("UICorner", dragCircle).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", dragCircle).Transparency = 1
+
+local dragging, dragStart, startPos
+dragCircle.InputBegan:Connect(function(input) 
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+        dragging = true; dragStart = input.Position; startPos = toggle.Position 
+    end 
+end)
+userInputService.InputChanged:Connect(function(input) 
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then 
+        local delta = input.Position - dragStart; 
+        toggle.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) 
+    end 
+end)
+userInputService.InputEnded:Connect(function() dragging = false end)
+
+-- [[ 5. فحص الفريق ]] --
+local function isEnemy(v)
+    if not v or v == player or not v.Character then return false end
+    local hl = v.Character:FindFirstChildOfClass("Highlight")
+    if hl and (hl.FillColor.G > hl.FillColor.R) then return false end
+    if player.Team ~= nil and v.Team ~= nil and player.Team == v.Team then return false end
+    return true 
+end
+
+-- [[ 6. منطق الالتصاق واللمس السريع ]] --
+local active = true
+local lockedTarget = nil
+
+local function fastTouch(targetChar, tool)
+    local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
+    if handle and targetChar:FindFirstChild("HumanoidRootPart") then
+        local dist = (player.Character.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude
+        if dist < 3.8 then
+            task.spawn(function()
+                for i = 1, 15 do
+                    firetouchinterest(targetChar.HumanoidRootPart, handle, 0)
+                    firetouchinterest(targetChar.HumanoidRootPart, handle, 1)
+                end
+            end)
+        end
+    end
+end
+
+-- [[ وظيفة التغيير ]] --
+local function toggleScript()
+    active = not active
+    toggle.Text = active and "SAADHUB: ON" or "SAADHUB: OFF"
+    toggle.BackgroundColor3 = active and Color3.fromRGB(170, 0, 0) or Color3.fromRGB(40, 40, 40)
+    if not active then lockedTarget = nil end
+end
+
+-- تفعيل/إيقاف عن طريق كليك الماوس اليسار
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        toggleScript()
+    end
+end)
+
+-- الزر اليدوي أيضاً يعمل
+toggle.MouseButton1Click:Connect(toggleScript)
+
+runService.RenderStepped:Connect(function()
+    if active and player.Character and player.Character:FindFirstChild("Humanoid") then
+        local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
+        if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
+
+        local tool = player.Character:FindFirstChildOfClass("Tool")
+        if tool then
+            local targetPlr = lockedTarget and game.Players:GetPlayerFromCharacter(lockedTarget)
+            if not lockedTarget or not lockedTarget.Parent or lockedTarget.Humanoid.Health <= 0 or (targetPlr and not isEnemy(targetPlr)) then
+                local cDist = math.huge; lockedTarget = nil
+                for _, v in pairs(game.Players:GetPlayers()) do
+                    if isEnemy(v) and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
+                        local d = (player.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                        if d < cDist then cDist = d; lockedTarget = v.Character end
+                    end
+                end
+            end
+            
+            if lockedTarget and lockedTarget:FindFirstChild("HumanoidRootPart") then
+                local targetRoot = lockedTarget.HumanoidRootPart
+                local myRoot = player.Character.HumanoidRootPart
+                local dist = (targetRoot.Position - myRoot.Position).Magnitude
+                
+                -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
+                local smartOffset = math.random(25, 35) / 10 
+                
+                if dist > smartOffset then
+                    player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
+                end
+
+                fastTouch(lockedTarget, tool)
+            end
+        else lockedTarget = nil end
+    end
+end)
