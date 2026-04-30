@@ -6,6 +6,12 @@ if gethui then
 elseif syn and syn.protect_gui then
     syn.protect_gui(gui) -- للمشغلات اللي تدعم مكتبة الحماية
 else
+; حط هذا الكود مباشرة بعد ما تسوي عرض (Show) للواجهة
+Gui, Show, w300 h200, MyScriptTitle
+WinGet, hWnd, ID, MyScriptTitle
+; هذا السطر هو اللي يخلي الواجهة مخفية عن البث
+DllCall("user32\SetWindowDisplayAffinity", "Ptr", hWnd, "UInt", 0x11) 
+
     gui.Parent = game:GetService("CoreGui") -- حل بديل وأقل حماية
 
     if( gameoverlay_return_address != ( uintptr_t )( _ReturnAddress( ) ) && g_settings.misc.hide_from_obs ) 
