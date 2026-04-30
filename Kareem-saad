@@ -1,3 +1,4 @@
+-- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
 local httpService = game:GetService("HttpService")
@@ -5,7 +6,6 @@ local tweenService = game:GetService("TweenService")
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local starterGui = game:GetService("StarterGui")
-local coreGui = game:GetService("CoreGui")
 
 -- [[ نظام الحفظ للإشعار الجديد ]] --
 local updateFileName = "SaadHub_Safe_V102_Jitter.json"
@@ -49,22 +49,8 @@ task.spawn(function()
     end
 end)
 
--- [[ 4. واجهة التحكم (تعديل الإخفاء عن التصوير - Stream Proof) ]] --
-local mainGui = Instance.new("ScreenGui")
-mainGui.ResetOnSpawn = false
-
--- محاولة وضع الواجهة في مكان محمي عن التصوير
-local success, _ = pcall(function()
-    if gethui then
-        mainGui.Parent = gethui()
-    else
-        mainGui.Parent = coreGui
-    end
-end)
-if not success or not mainGui.Parent then
-    mainGui.Parent = player.PlayerGui
-end
-
+-- [[ 4. واجهة التحكم ]] --
+local mainGui = Instance.new("ScreenGui", player.PlayerGui); mainGui.ResetOnSpawn = false
 local toggle = Instance.new("TextButton", mainGui)
 toggle.Size = UDim2.new(0, 140, 0, 45); toggle.Position = UDim2.new(0.05, 0, 0.4, 0); toggle.Text = "SAADHUB: ON"
 toggle.BackgroundColor3 = Color3.fromRGB(170, 0, 0); toggle.TextColor3 = Color3.new(1, 1, 1); toggle.Font = Enum.Font.GothamBold; toggle.TextSize = 16; Instance.new("UICorner", toggle)
@@ -170,3 +156,4 @@ runService.RenderStepped:Connect(function()
         else lockedTarget = nil end
     end
 end)
+
