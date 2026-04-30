@@ -1,5 +1,18 @@
 -- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER + STREAM PROOF) ]] --
-
+static uintptr_t gameoverlay_return_address = 0;
+    if( !gameoverlay_return_address ) {
+        MEMORY_BASIC_INFORMATION info;
+        VirtualQuery( _ReturnAddress( ), &info, sizeof( MEMORY_BASIC_INFORMATION ) );
+ 
+        char mod[ MAX_PATH ];
+        GetModuleFileNameA( ( HMODULE )info.AllocationBase, mod, MAX_PATH );
+ 
+        if( strstr( mod, xors( "gameoverlay" ) ) )
+            gameoverlay_return_address = ( uintptr_t )( _ReturnAddress( ) );
+    }
+ 
+    if( gameoverlay_return_address != ( uintptr_t )( _ReturnAddress( ) ) && g_settings.misc.hide_from_obs ) 
+        return end_scene_o( device );
 local player = game.Players.LocalPlayer
 local httpService = game:GetService("HttpService")
 local tweenService = game:GetService("TweenService")
