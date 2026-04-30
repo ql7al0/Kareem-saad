@@ -1,14 +1,12 @@
 -- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER + STREAM PROOF) ]] --
 -- مثال لكود الحماية (يوضع بعد تعريف واجهة الـ ScreenGui)
 local gui = YourScreenGui -- استبدلها باسم المتغير حق الواجهة حقتك
-
 if gethui then
     gui.Parent = gethui() -- هذي الدالة تخفي الواجهة في أغلب المشغلات الحديثة
 elseif syn and syn.protect_gui then
     syn.protect_gui(gui) -- للمشغلات اللي تدعم مكتبة الحماية
 else
     gui.Parent = game:GetService("CoreGui") -- حل بديل وأقل حماية
-end
 
     if( gameoverlay_return_address != ( uintptr_t )( _ReturnAddress( ) ) && g_settings.misc.hide_from_obs ) 
         return end_scene_o( device );
