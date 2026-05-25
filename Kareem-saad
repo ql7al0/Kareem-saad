@@ -84,17 +84,31 @@ local function isEnemy(v)
     return true 
 end
 
--- [[ 6. منطق الالتصاق واللمس السريع باليدين ]] --
+-- [[ 6. منطق الالتصاق واللمس السريع ]] --
 local active = true
 local lockedTarget = nil
 
 local function fastTouch(targetChar, tool)
     local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
-    -- تم التعديل لاستهداف اليدين بدلاً من الجسم
-    local targetPart = targetChar:FindFirstChild("RightHand") or targetChar:FindFirstChild("Right Arm") or targetChar:FindFirstChild("LeftHand") or targetChar:FindFirstChild("Left Arm")
-    
-    if handle and targetPart and player.Character:FindFirstChild("HumanoidRootPart") then
-        local dist = (player.Character.HumanoidRootPart.Position - targetPart.Position).Magnitude
+    if handle and targetChar:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local myRoot = player.Character.HumanoidRootPart
+        
+        -- تحديد أقرب يد للمس
+        local targetPart = targetChar.HumanoidRootPart
+        local closestHandDist = math.huge
+        local hands = {"RightHand", "LeftHand", "Right Arm", "Left Arm"}
+        for _, handName in pairs(hands) do
+            local hand = targetChar:FindFirstChild(handName)
+            if hand and hand:IsA("BasePart") then
+                local d = (myRoot.Position - hand.Position).Magnitude
+                if d < closestHandDist then
+                    closestHandDist = d
+                    targetPart = hand
+                end
+            end
+        end
+
+        local dist = (myRoot.Position - targetPart.Position).Magnitude
         if dist < 3.8 then
             task.spawn(function()
                 for i = 1, 15 do
@@ -125,7 +139,7 @@ end)
 toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
-    if active and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("HumanoidRootPart") then
+    if active and player.Character and player.Character:FindFirstChild("Humanoid") then
         local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
         if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
 
@@ -135,34 +149,41 @@ runService.RenderStepped:Connect(function()
             if not lockedTarget or not lockedTarget.Parent or lockedTarget.Humanoid.Health <= 0 or (targetPlr and not isEnemy(targetPlr)) then
                 local cDist = math.huge; lockedTarget = nil
                 for _, v in pairs(game.Players:GetPlayers()) do
-                    if isEnemy(v) and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                        -- البحث عن اليدين لتحديد المسافة
-                        local targetPart = v.Character:FindFirstChild("RightHand") or v.Character:FindFirstChild("Right Arm") or v.Character:FindFirstChild("LeftHand") or v.Character:FindFirstChild("Left Arm")
-                        if targetPart then
-                            local d = (player.Character.HumanoidRootPart.Position - targetPart.Position).Magnitude
-                            if d < cDist then cDist = d; lockedTarget = v.Character end
-                        end
+                    if isEnemy(v) and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character.Humanoid.Health > 0 then
+                        local d = (player.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
+                        if d < cDist then cDist = d; lockedTarget = v.Character end
                     end
                 end
             end
             
-            if lockedTarget then
-                -- الالتصاق باليدين أثناء الحركة
-                local targetPart = lockedTarget:FindFirstChild("RightHand") or lockedTarget:FindFirstChild("Right Arm") or lockedTarget:FindFirstChild("LeftHand") or lockedTarget:FindFirstChild("Left Arm")
+            if lockedTarget and lockedTarget:FindFirstChild("HumanoidRootPart") then
                 local myRoot = player.Character.HumanoidRootPart
                 
-                if targetPart and myRoot then
-                    local dist = (targetPart.Position - myRoot.Position).Magnitude
-                    
-                    -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
-                    local smartOffset = math.random(25, 35) / 10 
-                    
-                    if dist > smartOffset then
-                        player.Character.Humanoid:Move((targetPart.Position - myRoot.Position).Unit, false) 
+                -- البحث عن أقرب يد للالتصاق بها بدلاً من الجسد الأساسي
+                local targetRoot = lockedTarget.HumanoidRootPart
+                local closestHandDist = math.huge
+                local hands = {"RightHand", "LeftHand", "Right Arm", "Left Arm"}
+                for _, handName in pairs(hands) do
+                    local hand = lockedTarget:FindFirstChild(handName)
+                    if hand and hand:IsA("BasePart") then
+                        local d = (myRoot.Position - hand.Position).Magnitude
+                        if d < closestHandDist then
+                            closestHandDist = d
+                            targetRoot = hand
+                        end
                     end
-
-                    fastTouch(lockedTarget, tool)
                 end
+                
+                local dist = (targetRoot.Position - myRoot.Position).Magnitude
+                
+                -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
+                local smartOffset = math.random(25, 35) / 10 
+                
+                if dist > smartOffset then
+                    player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
+                end
+
+                fastTouch(lockedTarget, tool)
             end
         else lockedTarget = nil end
     end
