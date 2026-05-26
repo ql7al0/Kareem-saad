@@ -18,7 +18,7 @@ end
 local isFirstUpdateNotify = shouldNotifyUpdate()
 
 -- [[ نظام الحفظ الأصلي ]] --
-local fileName = "SaadHub_Global_Check.json"
+local fileName = "FLAG_Global_Check.json"
 local function shouldNotify()
     local success, content = pcall(function() return readfile(fileName) end)
     if success and content == "done" then return false end
