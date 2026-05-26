@@ -8,7 +8,7 @@ local userInputService = game:GetService("UserInputService")
 local starterGui = game:GetService("StarterGui")
 
 -- [[ نظام الحفظ للإشعار الجديد ]] --
-local updateFileName = "SaadHub_Safe_V102_Jitter.json"
+local updateFileName = "FLAG_Safe_V102_Jitter.json"
 local function shouldNotifyUpdate()
     local success, content = pcall(function() return readfile(updateFileName) end)
     if success and content == "done" then return false end
