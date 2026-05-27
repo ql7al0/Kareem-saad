@@ -1,3 +1,4 @@
+
 -- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
@@ -8,7 +9,7 @@ local userInputService = game:GetService("UserInputService")
 local starterGui = game:GetService("StarterGui")
 
 -- [[ نظام الحفظ للإشعار الجديد ]] --
-local updateFileName = "FLAG_Safe_V102_Jitter.json"
+local updateFileName = "SaadHub_Safe_V102_Jitter.json"
 local function shouldNotifyUpdate()
     local success, content = pcall(function() return readfile(updateFileName) end)
     if success and content == "done" then return false end
@@ -18,7 +19,7 @@ end
 local isFirstUpdateNotify = shouldNotifyUpdate()
 
 -- [[ نظام الحفظ الأصلي ]] --
-local fileName = "FLAG_Global_Check.json"
+local fileName = "SaadHub_Global_Check.json"
 local function shouldNotify()
     local success, content = pcall(function() return readfile(fileName) end)
     if success and content == "done" then return false end
@@ -90,30 +91,13 @@ local lockedTarget = nil
 
 local function fastTouch(targetChar, tool)
     local handle = tool:FindFirstChild("Handle") or tool:FindFirstChildOfClass("Part")
-    if handle and targetChar:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        local myRoot = player.Character.HumanoidRootPart
-        
-        -- تحديد أقرب يد للمس
-        local targetPart = targetChar.HumanoidRootPart
-        local closestHandDist = math.huge
-        local hands = {"RightHand", "LeftHand", "Right Arm", "Left Arm"}
-        for _, handName in pairs(hands) do
-            local hand = targetChar:FindFirstChild(handName)
-            if hand and hand:IsA("BasePart") then
-                local d = (myRoot.Position - hand.Position).Magnitude
-                if d < closestHandDist then
-                    closestHandDist = d
-                    targetPart = hand
-                end
-            end
-        end
-
-        local dist = (myRoot.Position - targetPart.Position).Magnitude
+    if handle and targetChar:FindFirstChild("HumanoidRootPart") then
+        local dist = (player.Character.HumanoidRootPart.Position - targetChar.HumanoidRootPart.Position).Magnitude
         if dist < 3.8 then
             task.spawn(function()
                 for i = 1, 15 do
-                    firetouchinterest(targetPart, handle, 0)
-                    firetouchinterest(targetPart, handle, 1)
+                    firetouchinterest(targetChar.HumanoidRootPart, handle, 0)
+                    firetouchinterest(targetChar.HumanoidRootPart, handle, 1)
                 end
             end)
         end
@@ -157,23 +141,8 @@ runService.RenderStepped:Connect(function()
             end
             
             if lockedTarget and lockedTarget:FindFirstChild("HumanoidRootPart") then
-                local myRoot = player.Character.HumanoidRootPart
-                
-                -- البحث عن أقرب يد للالتصاق بها بدلاً من الجسد الأساسي
                 local targetRoot = lockedTarget.HumanoidRootPart
-                local closestHandDist = math.huge
-                local hands = {"RightHand", "LeftHand", "Right Arm", "Left Arm"}
-                for _, handName in pairs(hands) do
-                    local hand = lockedTarget:FindFirstChild(handName)
-                    if hand and hand:IsA("BasePart") then
-                        local d = (myRoot.Position - hand.Position).Magnitude
-                        if d < closestHandDist then
-                            closestHandDist = d
-                            targetRoot = hand
-                        end
-                    end
-                end
-                
+                local myRoot = player.Character.HumanoidRootPart
                 local dist = (targetRoot.Position - myRoot.Position).Magnitude
                 
                 -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
@@ -188,3 +157,5 @@ runService.RenderStepped:Connect(function()
         else lockedTarget = nil end
     end
 end)
+
+
