@@ -1,4 +1,3 @@
-
 -- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
@@ -124,8 +123,12 @@ toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
     if active and player.Character and player.Character:FindFirstChild("Humanoid") then
-        local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
-        if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
+        
+        -- التعديل الأول: السماح بمسك القنبلة عند الضغط على 1 براحتك
+        if not player.Character:FindFirstChildOfClass("Tool") then
+            local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
+            if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
+        end
 
         local tool = player.Character:FindFirstChildOfClass("Tool")
         if tool then
@@ -149,6 +152,8 @@ runService.RenderStepped:Connect(function()
                 local smartOffset = math.random(25, 35) / 10 
                 
                 if dist > smartOffset then
+                    -- التعديل الثاني: توجيه الشخصية للخصم عشان حركة الرجل تشتغل طبيعي 100%
+                    myRoot.CFrame = CFrame.lookAt(myRoot.Position, Vector3.new(targetRoot.Position.X, myRoot.Position.Y, targetRoot.Position.Z))
                     player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
                 end
 
@@ -157,5 +162,3 @@ runService.RenderStepped:Connect(function()
         else lockedTarget = nil end
     end
 end)
-
-
