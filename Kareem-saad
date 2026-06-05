@@ -123,14 +123,16 @@ toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
     if active and player.Character and player.Character:FindFirstChild("Humanoid") then
-        
-        -- التعديل الأول: السماح بمسك القنبلة عند الضغط على 1 براحتك
-        if not player.Character:FindFirstChildOfClass("Tool") then
+        -- الفحص الذكي: للتأكد من عدم تجميد حركة اللاعب أو منع الضغط على القنابل
+        local tool = player.Character:FindFirstChildOfClass("Tool")
+        if not tool then
             local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
-            if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
+            if bpTool then 
+                player.Character.Humanoid:EquipTool(bpTool) 
+                tool = bpTool
+            end
         end
 
-        local tool = player.Character:FindFirstChildOfClass("Tool")
         if tool then
             local targetPlr = lockedTarget and game.Players:GetPlayerFromCharacter(lockedTarget)
             if not lockedTarget or not lockedTarget.Parent or lockedTarget.Humanoid.Health <= 0 or (targetPlr and not isEnemy(targetPlr)) then
@@ -152,8 +154,6 @@ runService.RenderStepped:Connect(function()
                 local smartOffset = math.random(25, 35) / 10 
                 
                 if dist > smartOffset then
-                    -- التعديل الثاني: توجيه الشخصية للخصم عشان حركة الرجل تشتغل طبيعي 100%
-                    myRoot.CFrame = CFrame.lookAt(myRoot.Position, Vector3.new(targetRoot.Position.X, myRoot.Position.Y, targetRoot.Position.Z))
                     player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
                 end
 
