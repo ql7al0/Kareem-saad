@@ -1,4 +1,4 @@
--- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 3.5-4.5 JITTER) ]] --
+-- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
 local httpService = game:GetService("HttpService")
@@ -123,16 +123,10 @@ toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
     if active and player.Character and player.Character:FindFirstChild("Humanoid") then
-        -- الفحص الذكي: للتأكد من عدم تجميد حركة اللاعب أو منع الضغط على القنابل
-        local tool = player.Character:FindFirstChildOfClass("Tool")
-        if not tool then
-            local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
-            if bpTool then 
-                player.Character.Humanoid:EquipTool(bpTool) 
-                tool = bpTool
-            end
-        end
+        local bpTool = player.Backpack:FindFirstChildOfClass("Tool")
+        if bpTool then player.Character.Humanoid:EquipTool(bpTool) end
 
+        local tool = player.Character:FindFirstChildOfClass("Tool")
         if tool then
             local targetPlr = lockedTarget and game.Players:GetPlayerFromCharacter(lockedTarget)
             if not lockedTarget or not lockedTarget.Parent or lockedTarget.Humanoid.Health <= 0 or (targetPlr and not isEnemy(targetPlr)) then
@@ -150,8 +144,8 @@ runService.RenderStepped:Connect(function()
                 local myRoot = player.Character.HumanoidRootPart
                 local dist = (targetRoot.Position - myRoot.Position).Magnitude
                 
-                -- [[ ميزة التذبذب الذكي المطلوبة: بين 3.5 و 4.5 ]] --
-                local smartOffset = math.random(35, 45) / 10 
+                -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
+                local smartOffset = math.random(25, 35) / 10 
                 
                 if dist > smartOffset then
                     player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
@@ -162,3 +156,5 @@ runService.RenderStepped:Connect(function()
         else lockedTarget = nil end
     end
 end)
+
+
