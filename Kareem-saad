@@ -1,4 +1,4 @@
--- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
+-- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 3.5-4.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
 local httpService = game:GetService("HttpService")
@@ -150,8 +150,8 @@ runService.RenderStepped:Connect(function()
                 local myRoot = player.Character.HumanoidRootPart
                 local dist = (targetRoot.Position - myRoot.Position).Magnitude
                 
-                -- [[ ميزة التذبذب الذكي المطلوبة: بين 2.5 و 3.5 ]] --
-                local smartOffset = math.random(25, 35) / 10 
+                -- [[ ميزة التذبذب الذكي المطلوبة: بين 3.5 و 4.5 ]] --
+                local smartOffset = math.random(35, 45) / 10 
                 
                 if dist > smartOffset then
                     player.Character.Humanoid:Move((targetRoot.Position - myRoot.Position).Unit, false) 
