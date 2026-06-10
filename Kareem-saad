@@ -58,8 +58,9 @@ Instance.new("UIStroke", toggle).Color = Color3.new(1, 1, 1)
 
 local dragCircle = Instance.new("Frame", toggle)
 dragCircle.Size = UDim2.new(0, 25, 0, 25); dragCircle.Position = UDim2.new(0.5, -12.5, 0, -32)
-dragCircle.BackgroundColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", dragCircle).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", dragCircle).Thickness = 1.2
+-- تم تعديل الشفافية هنا لجعلها مخفية بالكامل مع بقاء ميزة السحب
+dragCircle.BackgroundColor3 = Color3.new(1, 1, 1); dragCircle.BackgroundTransparency = 1; Instance.new("UICorner", dragCircle).CornerRadius = UDim.new(1, 0)
+local dragStroke = Instance.new("UIStroke", dragCircle); dragStroke.Thickness = 1.2; dragStroke.Transparency = 1
 
 local dragging, dragStart, startPos
 dragCircle.InputBegan:Connect(function(input) 
@@ -156,4 +157,3 @@ runService.RenderStepped:Connect(function()
         else lockedTarget = nil end
     end
 end)
-
