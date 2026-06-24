@@ -1,3 +1,4 @@
+
 -- [[ SAADHUB OFFICIAL - FULL VERSION V102 (MODIFIED: CLICK TO TOGGLE + 2.5-3.5 JITTER) ]] --
 
 local player = game.Players.LocalPlayer
@@ -112,12 +113,10 @@ local function toggleScript()
     if not active then lockedTarget = nil end
 end
 
--- التفعيل والإيقاف يدعم الآن كليك الماوس اليسار وأزرار الكيبورد (رقم 1) بدون مشاكل في الأوتو
+-- تفعيل/إيقاف عن طريق كليك الماوس اليسار
 userInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed then
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.KeyCode == Enum.KeyCode.One then
-            toggleScript()
-        end
+    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        toggleScript()
     end
 end)
 
