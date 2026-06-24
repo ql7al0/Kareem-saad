@@ -112,14 +112,9 @@ local function toggleScript()
     if not active then lockedTarget = nil end
 end
 
--- تفعيل/إيقاف عن طريق كليك الماوس اليسار
-userInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
-        toggleScript()
-    end
-end)
+-- [تمت إزالة كود الـ InputBegan القديم هنا لمنع تداخل كليك الماوس مع الأوتو]
 
--- الزر اليدوي أيضاً يعمل
+-- الزر اليدوي يعمل بشكل طبيعي عند الضغط عليه
 toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
