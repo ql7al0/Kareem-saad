@@ -112,9 +112,16 @@ local function toggleScript()
     if not active then lockedTarget = nil end
 end
 
--- [تمت إزالة كود الـ InputBegan القديم هنا لمنع تداخل كليك الماوس مع الأوتو]
+-- التفعيل والإيقاف يدعم الآن كليك الماوس اليسار وأزرار الكيبورد (رقم 1) بدون مشاكل في الأوتو
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.KeyCode == Enum.KeyCode.One then
+            toggleScript()
+        end
+    end
+end)
 
--- الزر اليدوي يعمل بشكل طبيعي عند الضغط عليه
+-- الزر اليدوي أيضاً يعمل
 toggle.MouseButton1Click:Connect(toggleScript)
 
 runService.RenderStepped:Connect(function()
